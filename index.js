@@ -7,7 +7,7 @@ import * as UserController from './controllers/UserController.js';
 
 
 mongoose
-    .connect('mongodb+srv://nastassya:u1H9vZVBXnRsJkkf@stepacademy.moxvp.mongodb.net/cources?retryWrites=true&w=majority&appName=StepAcademy')
+    .connect(process.env.MONGODB_URI)
     .then( () => console.log('DB ok'))
     .catch((err) => console.log('DB connect error', err))
 
@@ -22,7 +22,7 @@ app.post('/reg', registerValidation, UserController.register)
 app.get('/me', checkAuth, UserController.getMe)
 
 
-app.listen(3001, (err) => {
+app.listen(process.env.PORT || 3001, (err) => {
     if(err) {
         console.error(err);
     }
