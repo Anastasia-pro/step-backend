@@ -14,7 +14,9 @@ mongoose
 const app = express();
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: 'https://step-backend.onrender.com'
+}))
 
 app.get('/login', UserController.checkAuthStatus);
 app.post('/login', UserController.login)
