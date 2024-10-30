@@ -15,8 +15,8 @@ const app = express();
 
 app.use(express.json())
 app.use(cors({
-    origin: 'https://step-academy.netlify.app'
-}))
+    origin: ['https://step-academy.netlify.app', 'http://localhost:3000']
+}));
 app.get('/login', UserController.checkAuthStatus);
 app.post('/login', UserController.login)
 app.post('/reg', registerValidation, UserController.register)
