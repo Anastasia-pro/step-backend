@@ -1,108 +1,123 @@
-import jwt from 'jsonwebtoken';
-import { validationResult } from 'express-validator';
-import UserSchema from '../models/User.js';
-
-
-
-export const register = async (req, res)=> {
-    try{
-     const errors = validationResult(req)
-    if(!errors.isEmpty()) {
-     return res.status(400).json(errors.array())
+import jwt from "jsonwebtoken";
+import { validationResult } from "express-validator";
+import UserSchema from "../models/User.js";
+import EventSchema from "../models/EventSchema.js";
+export const register = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json(errors.array());
     }
- 
+
     const doc = new UserSchema({
-     email: req.body.email,
-     fullName: req.body.fullName,
-     phone: req.body.phone,
-     avatarUrl: req.body.avatarUrl
- })
- 
-     const user = await doc.save()
- 
-     const token = jwt.sign({
-         _id: user._id
-     },
-         'qaz335577',
-         
-     {
-         expiresIn: '30d'
-     }    
-     )
- 
-    res.json({
-     ...user._doc,
-     token
-    })
- }catch (err) {
-     console.log(err)
-     res.status(500).json({
-         message: 'Не удалось зарегистрироваться'
-     })
-    } 
-}
+      email: req.body.email,
+      fullName: req.body.fullName,
+      phone: req.body.phone,
+      avatarUrl: req.body.avatarUrl,
+    });
 
-export const checkAuthStatus = async(req, res) => {
-    if (req.user) {
-        res.json({ authenticated: true });
-      } else {
-        res.json({ authenticated: false });
+    const user = await doc.save();
+
+    const token = jwt.sign(
+      {
+        _id: user._id,
+      },
+      "qaz335577",
+
+      {
+        expiresIn: "30d",
       }
-}
+    );
 
-export const login = async (req,res) => {
-    try{
-        const user = await UserSchema.findOne({email: req.body.email})
+    res.json({
+      ...user._doc,
+      token,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Не удалось зарегистрироваться",
+    });
+  }
+};
 
+export const checkAuthStatus = async (req, res) => {
+  if (req.user) {
+    res.json({ authenticated: true });
+  } else {
+    res.json({ authenticated: false });
+  }
+};
 
-        if(!user) {
-            return res.status(404).json({
-                message: 'Пользователь не найден'
-            })
-        }
+export const login = async (req, res) => {
+  try {
+    const user = await UserSchema.findOne({ email: req.body.email });
 
-        const token = jwt.sign({
-            _id: user._id
-        },
-            'qaz335577',
-            
-        {
-            expiresIn: '30d'
-        }    
-        )
-        res.json({
-            ...user._doc,
-            token
-           })
-    }catch(err) {
-        console.log(err)
-        res.status(500).json({
-            message: 'Не удалось авторизоваться'
-        })
-       } 
-}
+    if (!user) {
+      return res.status(404).json({
+        message: "Пользователь не найден",
+      });
+    }
 
+    const token = jwt.sign(
+      {
+        _id: user._id,
+      },
+      "qaz335577",
 
+      {
+        expiresIn: "30d",
+      }
+    );
+    res.json({
+      ...user._doc,
+      token,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Не удалось авторизоваться",
+    });
+  }
+};
 
 export const getMe = async (req, res) => {
-    try {
-        const user = await UserSchema.findById(req.userId)
+  try {
+    const user = await UserSchema.findById(req.userId);
 
-        if(!user) {
-            return res.status(404).json({
-                message: 'Пользователь не найден'
-            })
-        }
-
-        res.json({
-            ...user._doc,
-            
-           })
-    } catch (err) {
-        console.log(err)
-        res.status(500).json({
-            message: 'Нет доступа'
-        })
+    if (!user) {
+      return res.status(404).json({
+        message: "Пользователь не найден",
+      });
     }
-}
 
+    res.json({
+      ...user._doc,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Нет доступа",
+    });
+  }
+};
+
+export const createEvent = async (req, res) => {
+  try {
+    const { title } = req.body;
+    const event = await EventSchema.create({ title, userId: req.userId });
+    res.json(event);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Не удалось создать мероприятие" });
+  }
+};
+export const getEvents = async (req, res) => {
+  try {
+    const events = await EventSchema.find({ userId: req.userId });
+    res.json(events);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Не удалось получить мероприятия" });
+  }
+};
